@@ -19,10 +19,10 @@ let client = Stomp.over(sock);
 // Start the STOMP communications, provide a callback for when the CONNECT frame arrives.
 client.connect({}, frame => {
     // Subscribe to "/topic/messages". Whenever a message arrives add the text in a list-item element in the unordered list.
-    client.subscribe("/api/broadcast", payload => {
+    client.subscribe("/api/message/subscription/" + document.getElementById("room-input").value, payload => {
     
 
-        console.log(payload);
+        console.log(payload.body);
 
         let message_list = document.getElementById('message-list');
         let message = document.createElement('li');
@@ -40,7 +40,7 @@ function sendMessage(){
     let input = document.getElementById("message-input");
     let message = input.value;
     
-    client.send('/api/message/new', {}, JSON.stringify({message: message}));
+    client.send('/api/message/new/' + document.getElementById("room-input").value, {}, JSON.stringify({message: message}));
 
 
 }
