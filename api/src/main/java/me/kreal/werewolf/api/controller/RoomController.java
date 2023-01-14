@@ -1,6 +1,5 @@
 package me.kreal.werewolf.api.controller;
 
-import jdk.nashorn.internal.runtime.options.Option;
 import me.kreal.werewolf.api.domain.Game;
 import me.kreal.werewolf.api.domain.Room;
 import me.kreal.werewolf.api.dto.MessageDto;
@@ -16,48 +15,44 @@ import java.util.Optional;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/game")
-public class GameController {
+@RequestMapping("/room")
+public class RoomController {
 
     private final SimpMessagingTemplate messagingTemplate;
-    private final GameService gameService;
     private final RoomService roomService;
 
+
     @Autowired
-    public GameController(SimpMessagingTemplate messagingTemplate, GameService gameService, RoomService roomService) {
+    public RoomController(SimpMessagingTemplate messagingTemplate, RoomService roomService) {
         this.messagingTemplate = messagingTemplate;
-        this.gameService = gameService;
         this.roomService = roomService;
     }
 
-
     @GetMapping("/new")
-    public DataResponse getNewGame(@Payload MessageDto messageDto, @RequestParam int numOfPlayer, @RequestParam String roomName) {
+    public DataResponse getNewRoom(@Payload MessageDto messageDto, @RequestParam String roomName) {
 
 //        messageDto.setMessage("new game");
 //        messagingTemplate.convertAndSend("/api/message/subscription/" + "123",messageDto);
 
-        Optional<Room> roomOptional = roomService.findRoomByName(roomName);
+        Optional<Room> roomOptional = roomService.createNewRoom(roomName);
 
         if (!roomOptional.isPresent()) {
             return DataResponse.builder().success(false).message("Room name is exist").build();
         }
 
-        Game game = gameService.createNewGame(numOfPlayer, roomOptional.get());
-
-        return DataResponse.builder().success(true).data(game).build();
+        return DataResponse.builder().success(true).data(roomOptional.get()).build();
     }
 
-    @GetMapping("/{id}")
-    public DataResponse getGameById(@PathVariable String id, @Payload MessageDto messageDto) {
+    @GetMapping("/{roomName}")
+    public DataResponse getRoomByRoomName(@Payload MessageDto messageDto, @PathVariable String roomName) {
 
-        Optional<Game> gameOptional = gameService.findGameById(id);
+        Optional<Room> roomOptional = roomService.findRoomByName(roomName);
 
-        if (!gameOptional.isPresent()) {
-            return DataResponse.builder().success(false).message("Game id is not exist").build();
+        if (!roomOptional.isPresent()) {
+            return DataResponse.builder().success(false).message("Room name is not exist").build();
         }
 
-        return DataResponse.builder().success(true).data(gameOptional.get()).build();
+        return DataResponse.builder().success(true).data(roomOptional.get()).build();
     }
 
 }

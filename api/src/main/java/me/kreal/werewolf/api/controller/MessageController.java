@@ -22,14 +22,13 @@ public class MessageController {
 
     // Handles messages from /app/chat. (Note the Spring adds the /app prefix for us).
     @MessageMapping("/new/{id}")
-    public void getMessages(MessageDto msg, @DestinationVariable String id, @Payload DataResponse dataResponse){
+    public void getMessages(MessageDto msg, @DestinationVariable String id, @Payload MessageDto messageDto){
 
         System.out.println("received message: " + msg.getMessage() + ". from: " + id);
 
-        dataResponse.setSuccess(true);
-        dataResponse.setMessage("Game " + id + " received message: " + msg.getMessage());
+        messageDto.setMessage("Game " + id + " received message: " + msg.getMessage());
 
-        messagingTemplate.convertAndSend("/api/message/subscription/" + id, dataResponse);
+        messagingTemplate.convertAndSend("/api/message/subscription/" + id, messageDto);
     }
 
 
