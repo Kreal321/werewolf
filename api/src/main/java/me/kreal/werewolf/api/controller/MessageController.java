@@ -26,7 +26,7 @@ public class MessageController {
 
         System.out.println("received message: " + msg.getMessage() + ". from: " + id);
 
-        messageDto.setMessage("Game " + id + " received message: " + msg.getMessage());
+        messageDto.setMessage("[" + id + "]: " + msg.getMessage());
 
         messagingTemplate.convertAndSend("/api/message/subscription/" + id, messageDto);
     }

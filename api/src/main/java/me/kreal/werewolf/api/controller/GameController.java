@@ -40,7 +40,7 @@ public class GameController {
         Optional<Room> roomOptional = roomService.findRoomByName(roomName);
 
         if (!roomOptional.isPresent()) {
-            return DataResponse.builder().success(false).message("Room name is exist").build();
+            return DataResponse.builder().success(false).message("房间名称不存在").build();
         }
 
         Game game = gameService.createNewGame(numOfPlayer, roomOptional.get());
@@ -54,7 +54,7 @@ public class GameController {
         Optional<Game> gameOptional = gameService.findGameById(id);
 
         if (!gameOptional.isPresent()) {
-            return DataResponse.builder().success(false).message("Game id is not exist").build();
+            return DataResponse.builder().success(false).message("这场游戏ID不存在").build();
         }
 
         return DataResponse.builder().success(true).data(gameOptional.get()).build();

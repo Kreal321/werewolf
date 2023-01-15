@@ -3,6 +3,7 @@ package me.kreal.werewolf.api.controller;
 import me.kreal.werewolf.api.domain.Game;
 import me.kreal.werewolf.api.domain.Room;
 import me.kreal.werewolf.api.dto.MessageDto;
+import me.kreal.werewolf.api.request.NewRoomRequest;
 import me.kreal.werewolf.api.response.DataResponse;
 import me.kreal.werewolf.api.service.GameService;
 import me.kreal.werewolf.api.service.RoomService;
@@ -28,16 +29,16 @@ public class RoomController {
         this.roomService = roomService;
     }
 
-    @GetMapping("/new")
-    public DataResponse getNewRoom(@Payload MessageDto messageDto, @RequestParam String roomName) {
+    @PostMapping("/new")
+    public DataResponse getNewRoom(@Payload MessageDto messageDto, @RequestBody NewRoomRequest newRoomRequest) {
 
 //        messageDto.setMessage("new game");
 //        messagingTemplate.convertAndSend("/api/message/subscription/" + "123",messageDto);
 
-        Optional<Room> roomOptional = roomService.createNewRoom(roomName);
+        Optional<Room> roomOptional = roomService.createNewRoom(newRoomRequest.getRoomName());
 
         if (!roomOptional.isPresent()) {
-            return DataResponse.builder().success(false).message("Room name is exist").build();
+            return DataResponse.builder().success(false).message("房间名称已经存在").build();
         }
 
         return DataResponse.builder().success(true).data(roomOptional.get()).build();
@@ -49,7 +50,7 @@ public class RoomController {
         Optional<Room> roomOptional = roomService.findRoomByName(roomName);
 
         if (!roomOptional.isPresent()) {
-            return DataResponse.builder().success(false).message("Room name is not exist").build();
+            return DataResponse.builder().success(false).message("房间名称不存在").build();
         }
 
         return DataResponse.builder().success(true).data(roomOptional.get()).build();

@@ -23,12 +23,14 @@ public class Room implements Serializable {
     private String id;
 
     @Indexed(unique = true)
-    private String name;
+    private String roomName;
 
     private String gameId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
+
+    private boolean isOpen;
 
 
 }

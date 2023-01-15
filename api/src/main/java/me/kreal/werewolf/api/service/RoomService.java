@@ -23,9 +23,9 @@ public class RoomService {
 
     public Optional<Room> createNewRoom(String name) {
 
-        if (roomRepo.findByName(name).isPresent()) return Optional.empty();
+        if (roomRepo.findByRoomName(name).isPresent()) return Optional.empty();
 
-        Room room = new Room(null, name, null, new Date());
+        Room room = new Room(null, name, null, new Date(), true);
 
         return Optional.of(roomRepo.save(room));
     }
@@ -38,7 +38,7 @@ public class RoomService {
     }
 
     public Optional<Room> findRoomByName(String name) {
-        return roomRepo.findByName(name);
+        return roomRepo.findByRoomName(name);
     }
 
 

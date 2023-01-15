@@ -1,46 +1,109 @@
-// autoConnect();
-var sock = new SockJS('http://localhost:8080/stomp');
+const roomJoinBtn = document.getElementById("roomJoinBtn");
+const roomCreateBtn = document.getElementById("roomCreateBtn");
+const roomForm = document.getElementById("roomForm");
+const roomNameInput = roomForm.roomName;
 
-sock.onopen = function() {
-    console.log('open');
-};
+function roomNameInputError(message) {
+    roomNameInput.classList.add("is-invalid");
+    swal({
+        title: "错误",
+        text: message,
+        icon: "error",
+    });
+}
 
-sock.onmessage = function(e) {
-    console.log('message', e.data);
-};
-
-sock.onclose = function() {
-    console.log('close');
-};
-
-// Create a new StompClient object with the WebSocket endpoint
-let client = Stomp.over(sock);
-
-// Start the STOMP communications, provide a callback for when the CONNECT frame arrives.
-client.connect({}, frame => {
-    // Subscribe to "/topic/messages". Whenever a message arrives add the text in a list-item element in the unordered list.
-    client.subscribe("/api/message/subscription/" + document.getElementById("room-input").value, payload => {
-    
-
-        console.log(payload.body);
-
-        let message_list = document.getElementById('message-list');
-        let message = document.createElement('li');
-        
-        message.appendChild(document.createTextNode(JSON.parse(payload.body).message));
-        message_list.appendChild(message);
-
+async function joinRoomRequest(roomName) {
+    let response = await fetch(HOST + "/room/" + roomName, {
+        method: 'GET', 
+        mode: 'cors',
+        headers: {
+            Accept: 'application/json',
+        }
+    }).catch(error => {
+        swal({
+            title: "网络错误",
+            text: "请检查设备网络或服务器已离线",
+            icon: "error",
+        });
+        return;
     });
 
-});
+    const data = await response.json();
 
-// Take the value in the ‘message-input’ text field and send it to the server with empty headers.
-function sendMessage(){
+    // Failed
+    if (!data.success) {
+        roomNameInputError(data.message);
+        return;
+    }
 
-    let input = document.getElementById("message-input");
-    let message = input.value;
-    
-    client.send('/api/message/new/' + document.getElementById("room-input").value, {}, JSON.stringify({message: message}));
+    // If room is closed
+    if (!data.data.open) {
+        roomNameInputError("房间已被关闭");
+        return;
+    }
 
+    // Success
+    window.localStorage.setItem('roomName', data.data.roomName);
+    window.location.replace("game.html");
 
 }
+
+async function createRoomRequest(roomName) {
+    let response = await fetch(HOST + "/room/new", {
+        method: 'POST', 
+        mode: 'cors',
+        headers: {
+            "Accept": 'application/json',
+            "Content-Type": 'application/json'
+        },
+        body: JSON.stringify({
+            "roomName": roomName
+        })
+    }).catch(error => {
+        swal({
+            title: "网络错误",
+            text: "请检查设备网络或服务器已离线",
+            icon: "error",
+        });
+        return;
+    });
+
+    const data = await response.json();
+
+    // Failed
+    if (!data.success) {
+        roomNameInputError(data.message);
+        return;
+    }
+
+    // Success
+    window.localStorage.setItem('roomName', data.data.roomName);
+    window.location.replace("game.html");
+
+}
+
+roomJoinBtn.addEventListener("click", ()=>{
+    if (!roomNameInput.value) {
+        roomNameInputError("房间名称不能为空");
+        return;
+    }
+    if (/\s/g.test(roomNameInput.value)) {
+        roomNameInputError("房间名称不能包含空格");
+        return;
+    } 
+    joinRoomRequest(roomNameInput.value);
+});
+
+roomCreateBtn.addEventListener("click", ()=>{
+    if (!roomNameInput.value) {
+        roomNameInputError("房间名称不能为空");
+        return;
+    }
+    if (/\s/g.test(roomNameInput.value)) {
+        roomNameInputError("房间名称不能包含空格");
+        return;
+    } 
+    createRoomRequest(roomNameInput.value);
+});
+
+
